@@ -529,10 +529,16 @@ var vis = div.append("svg")
 
     .attr("transform", "translate(" + (r + p) + "," + (r + p) + ")");
 
+var tooltip = d3.select('body').append('div')
+	.style('position', 'absolute')
+	.style('padding' , ' 0 10px')
+	.style('background', 'white')
+	.style('opacity', 0) 
+	
 	// Bottom text
 div.append("p")
     .attr("id", "helper")
-    .text("Click me.");
+    .text("Please ctrl click the pie to navigate to the actual text.");
 
 var partition = d3.layout.partition()
     .sort(null)
@@ -584,7 +590,8 @@ readJson(JSON.stringify(jsonData), function(json) {
         return "rotate(" + rotate + ")translate(" + (y(d.y) + p) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
       }
 )
-.on("click", click);
+.on("click", click)
+.on('mouseover', mouseover);
 
   // Splits the names onto multiple lines
   textEnter.append("tspan")
@@ -615,12 +622,35 @@ readJson(JSON.stringify(jsonData), function(json) {
       .attr("dy", "1em")
       .text(function(d) {if (d.depth < 4) { return d.depth ? d.name.split(" ")[6] || "" : "";}else{return ""}});
  
-      
+
+  function mouseover(d) 
+{
+	tooltip.transition()
+		.style('opacity', .9)
+
+	// position tooltip
+	
+	// place text in tooltip
+	tooltip.html(d.name)
+		.style('left', (d3.event.pageX) + 35 + 'px')
+		.style('top', (d3.event.pageY) - 100 + 'px');
+	
+	d3.select(this)
+		.style('opacity', .9)
+
+}  
 
   function click(d) {
-	// Navigate to url of text
-	if(d.depth >= 3){
-		window.location = d.url};
+	// Navigate to url of text if depth exceeded
+	//if(d.depth >= 3){
+	//	window.location = d.url};
+  
+	// go to url with ctrl click
+	if(event.ctrlKey)
+	{
+		window.location = d.url;
+	}
+  
   
     path.transition()
       .duration(duration)
